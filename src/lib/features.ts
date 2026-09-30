@@ -13,3 +13,12 @@ export const FEATURED_MODEL = {
   url: "/ifc/26610_ese_pianicad_20260929_IFC.ifc",
   size: 36384719,
 };
+
+/** Arquivos de realidade aumentada (iPhone / AR Quick Look), gerados por scripts/ifc-to-ar.mjs. */
+export const FEATURED_AR = {
+  maquete: "/ar/26610_ese_pianicad_20260929_IFC-maquete.usdz",
+  real: "/ar/26610_ese_pianicad_20260929_IFC-real.usdz",
+  maqueteScale: "1:50",
+  sizeMeters: { x: 16.78, y: 21.61, z: 12.82 },
+  sizeMb: 13,
+};

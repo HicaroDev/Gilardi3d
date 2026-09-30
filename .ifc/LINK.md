@@ -1,25 +1,25 @@
 # Modelos IFC de demonstração
 
-Os arquivos `.ifc` desta pasta são publicados automaticamente no build
-(`scripts/copy-bim-assets.mjs` → `public/ifc/`) e abertos no visualizador online.
+Os arquivos desta pasta são publicados no build (`scripts/copy-bim-assets.mjs`):
+`.ifc/*.ifc` → `/ifc/*` e `.ifc/ar/*.usdz` → `/ar/*`.
 
 ## Links
 
-| Modelo | Link |
+| O quê | Link |
 |---|---|
-| **26610_ese_pianicad_20260929_IFC.ifc** (principal) | https://gilardi3d.vercel.app/demo |
-| AC20-FZK-Haus.ifc (casa de exemplo) | https://gilardi3d.vercel.app/demo?modelo=haus |
-| Visualizador vazio (arraste seu IFC) | https://gilardi3d.vercel.app/demo?modelo=vazio |
+| **Modelo 26610 (pianicad) — viewer 3D** | https://gilardi3d.vercel.app |
+| Realidade aumentada no iPhone (abre direto o painel AR) | https://gilardi3d.vercel.app/?ar=1 |
+| USDZ maquete 1:50 (AR Quick Look) | https://gilardi3d.vercel.app/ar/26610_ese_pianicad_20260929_IFC-maquete.usdz |
+| USDZ tamanho real 1:1 | https://gilardi3d.vercel.app/ar/26610_ese_pianicad_20260929_IFC-real.usdz |
 
-Preview (exige login na Vercel): https://gilardi3d-bkmdkupty-hicarodevs-projects.vercel.app/demo
+No iPhone: abra o link no **Safari**, toque em **Ver em AR** e escolha maquete ou tamanho real.
+No computador: o botão **Ver em AR** mostra um QR Code para abrir no iPhone.
 
-## Como adicionar outro modelo
+## Trocar / adicionar modelo
 
 1. Coloque o `.ifc` nesta pasta.
-2. Registre-o em `SAMPLES` no arquivo `src/app/demo/demo-viewer.tsx`
-   (chave usada em `?modelo=<chave>`).
-3. Faça commit/push — a Vercel publica sozinha.
+2. Gere o AR: `node scripts/ifc-to-ar.mjs .ifc/<arquivo>.ifc .ifc/ar 50`
+3. Atualize `FEATURED_MODEL` e `FEATURED_AR` em `src/lib/features.ts`.
+4. Commit/push na `main` — a Vercel publica sozinha.
 
-> Atenção: tudo o que está nesta pasta fica **público** no link acima.
-> Projetos de clientes devem ir pela plataforma (login → projeto → upload),
-> onde os arquivos ficam privados.
+> Atenção: tudo o que está nesta pasta fica **público**.

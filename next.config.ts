@@ -61,6 +61,14 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
       },
       {
+        // O AR Quick Look do iOS exige este Content-Type para abrir o USDZ.
+        source: "/ar/:file*",
+        headers: [
+          { key: "Content-Type", value: "model/vnd.usdz+zip" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
+      {
         source: "/ifc/:file*",
         headers: [{ key: "Cache-Control", value: "public, max-age=3600" }],
       },

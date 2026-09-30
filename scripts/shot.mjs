@@ -6,6 +6,15 @@ const page = await browser.newPage({ viewport: { width: +w, height: +h } });
 const logs = [];
 page.on("console", (m) => { if (["error", "warning"].includes(m.type())) logs.push(`[${m.type()}] ${m.text()}`); });
 page.on("pageerror", (e) => logs.push(`[pageerror] ${e.message}`));
+if (process.env.EMULATE_AR) {
+  // Simula o Safari do iPhone (suporte a rel="ar" do AR Quick Look).
+  await page.addInitScript(() => {
+    const orig = DOMTokenList.prototype.supports;
+    DOMTokenList.prototype.supports = function (t) {
+      return t === "ar" ? true : orig.call(this, t);
+    };
+  });
+}
 const t0 = Date.now();
 await page.goto(url, { waitUntil: "domcontentloaded", timeout: 180000 });
 try {

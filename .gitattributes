@@ -4,3 +4,4 @@
 *.wasm binary
 *.png binary
 *.ico binary
+*.usdz binary

@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gilardi 3D
 
-## Getting Started
+Plataforma BIM própria: **criar projeto → enviar IFC → processar → navegar em 3D no navegador → compartilhar por link/QR Code**, com a arquitetura preparada para um futuro **app iPhone com realidade aumentada** consumindo a mesma API.
 
-First, run the development server:
+> Estado atual: o site público abre direto o modelo **26610 (pianicad)**, sem login.
+> A plataforma completa (login, projetos, upload, compartilhamento) está pronta no código e
+> **desligada por chave** (`NEXT_PUBLIC_PLATFORM_ENABLED`). Ver [TASKS.md](TASKS.md).
+
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Framework | Next.js 16 (App Router, **webpack**) · React 19 · TypeScript strict |
+| UI | Tailwind CSS v4 · lucide-react |
+| Motor BIM | [That Open Engine](https://github.com/ThatOpen) 3.4 (`components`, `components-front`, `fragments`) · `web-ifc` **0.0.77** · Three.js |
+| Banco | PostgreSQL (Neon na Vercel) · Prisma 7 (`@prisma/adapter-pg`) |
+| Auth | Auth.js v5 (credenciais, JWT) |
+| Arquivos | Vercel Blob **privado** (upload direto do navegador, download por URL pré-assinada) |
+| Deploy | Vercel (GitHub `HicaroDev/Gilardi3d`) |
+
+## Rodando localmente
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install                 # também gera o Prisma Client e copia WASM/worker para public/
+cp .env.example .env        # ajuste AUTH_SECRET
+npm run dev                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Só o visualizador (padrão): nada mais é necessário.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Plataforma completa em desenvolvimento:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run db:local            # Postgres local do Prisma (mostra a DATABASE_URL TCP)
+# .env → DATABASE_URL=... e NEXT_PUBLIC_PLATFORM_ENABLED=true
+npm run db:migrate          # aplica as migrações
+npm run dev
+```
 
-## Learn More
+Sem `BLOB_READ_WRITE_TOKEN`, os arquivos vão para `.storage/` (apenas desenvolvimento).
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Comando | O que faz |
+|---|---|
+| `npm run dev` / `build` / `start` | Next.js (webpack) |
+| `npm run lint` · `npm run typecheck` | ESLint · TypeScript |
+| `npm test` | testes unitários (vitest) |
+| `node tests/e2e/flow.mjs [url] [ifc]` | fluxo E2E completo (Playwright) — requer plataforma ligada |
+| `node scripts/shot.mjs <url> <png>` | print de qualquer página (aguarda o modelo carregar) |
+| `npm run db:migrate` · `db:deploy` · `db:studio` | Prisma |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Estrutura
 
-## Deploy on Vercel
+```
+.ifc/                    modelos de demonstração (publicados em /ifc/*) + LINK.md
+prisma/                  schema e migrações
+scripts/                 copy-bim-assets (WASM/worker/IFC → public), shot (prints)
+src/app/                 rotas (App Router)
+  (auth)/                login, cadastro, recuperação de senha
+  (app)/                 dashboard, projetos, configurações, perfil
+  viewer/[modelId]       viewer da plataforma (processa e salva o modelo otimizado)
+  s/[token]              links públicos de compartilhamento
+  api/                   upload (Blob/local), arquivos protegidos, status de processamento, health
+src/viewer/engine/       fachada sobre o That Open Engine (BimViewer)
+src/components/viewer/   UI do viewer (árvore, pavimentos, classes, propriedades, ferramentas)
+src/lib/                 db, auth, permissões, storage, validação, features
+src/server/              server actions e consultas
+docs/                    arquitetura, API e decisões (ADRs)
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy (Vercel)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Projeto `gilardi3d` já ligado ao GitHub (push na `main` = produção; outras branches = preview).
+2. Modo atual (só o modelo): **nenhuma variável obrigatória**.
+3. Para ligar a plataforma: Neon Postgres + Blob store (privado) pelo Marketplace da Vercel, depois
+   `AUTH_SECRET`, `NEXT_PUBLIC_PLATFORM_ENABLED=true`, `npm run db:deploy` e redeploy.
+   Detalhes em [docs/deploy.md](docs/deploy.md).
+
+## Créditos
+
+Motor BIM: That Open Engine (MIT) e web-ifc (MPL-2.0). Casa de exemplo AC20-FZK-Haus: KIT/IAI.

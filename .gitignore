@@ -46,6 +46,7 @@ next-env.d.ts
 /public/wasm/
 /public/fragments/
 /public/ifc/
+/public/ar/
 
 # prisma client gerado
 /src/generated/

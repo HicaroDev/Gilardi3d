@@ -1,75 +1,60 @@
 # Gilardi 3D — To-do / Acompanhamento
 
-> Plataforma BIM própria (fluxo tipo Augin): projetos → upload IFC → processamento → viewer 3D → compartilhamento → (futuro) iPhone + AR.
-> Fonte do plano: `seed.md`. Progresso geral atualizado a cada marco.
+> Plataforma BIM própria (fluxo tipo Augin): projetos → upload IFC → processamento → viewer 3D → compartilhamento → AR no iPhone.
+> Fonte do plano: `seed.md`. Decisão de 30/09: **site público = só o modelo 26610, sem login**; plataforma completa pronta e desligada por chave.
 
-**Progresso geral: 35 %**
+**Progresso geral: 88 %**
 
-Legenda: `[x]` feito · `[~]` em andamento · `[ ]` pendente · `[-]` fora do escopo desta fase
+Legenda: `[x]` feito · `[~]` em andamento · `[ ]` pendente · `[-]` depois
 
 ## M0 — Fundação
-- [x] G3D-001 Next.js 16 (App Router) + TypeScript strict
-- [x] G3D-003 Tailwind v4 com tokens de cor (tema escuro técnico, laranja Gilardi)
-- [x] G3D-004 ESLint (flat config do Next)
-- [ ] G3D-005 Prettier
-- [ ] G3D-006 Validação de variáveis de ambiente (zod)
-- [x] G3D-007 Projeto Vercel `gilardi3d` criado e ligado ao GitHub
-- [x] G3D-008 Deploy de preview
-- [ ] G3D-009 Domínio de produção (aguarda liberação do deploy `--prod`)
+- [x] Next.js 16 + TypeScript strict + Tailwind v4 + ESLint
+- [x] Validação de variáveis de ambiente (zod)
+- [x] Projeto Vercel `gilardi3d` ligado ao GitHub `HicaroDev/Gilardi3d`
+- [x] Primeiro deploy público: https://gilardi3d.vercel.app/demo
+- [~] Deploy de produção da versão atual (liberado pelo Hícaro)
 
-## M1 — Banco + Auth + Projetos
-- [ ] G3D-010 Banco PostgreSQL (Neon via Vercel Marketplace) — local: Prisma Postgres (`prisma dev`)
-- [ ] G3D-011 Prisma 7 + client gerado
-- [ ] G3D-012..019 Schema: User, Organization, Member, Project, ProjectMember, BimModel, ModelVersion, File, ProcessingJob, Share, AuditLog
-- [ ] G3D-020 Migração inicial
-- [ ] G3D-021 Auth.js v5 (credenciais, JWT)
-- [ ] G3D-022 Login · G3D-023 Cadastro · G3D-024 Logout
-- [ ] G3D-025 Recuperação de senha (token + e-mail via Resend; log no dev)
-- [ ] G3D-026 Proteção de rotas (proxy.ts) · G3D-027 Dashboard protegido
-- [ ] G3D-030..035 Projetos: listar, criar, detalhes, renomear, arquivar, excluir
-- [ ] G3D-036 Permissões por projeto (OWNER/EDITOR/VIEWER)
+## M1 — Banco + Auth + Projetos (pronto, desligado por chave)
+- [x] PostgreSQL + Prisma 7: User, Organization, Member, Project, ProjectMember, BimModel, ModelVersion, File, ProcessingJob, Share, AuditLog
+- [x] Auth.js v5: login, cadastro, logout, recuperação de senha (Resend), perfil, troca de senha
+- [x] Proteção de rotas (proxy.ts) + permissões OWNER/EDITOR/VIEWER
+- [x] Projetos: listar, criar, editar, arquivar, excluir, equipe
+- [ ] Criar Neon + Blob na Vercel (só quando for ligar a plataforma)
 
-## M2 — Upload IFC
-- [ ] G3D-040 Vercel Blob (client upload direto do navegador, sem passar pela Function)
-- [ ] G3D-041/042 Upload multipart · G3D-043 barra de progresso
-- [ ] G3D-044 Validação de IFC (extensão + cabeçalho ISO-10303-21) · G3D-045 limite de tamanho
-- [ ] G3D-046 Metadados do arquivo + ModelVersion
-- [ ] Storage local em disco para desenvolvimento (sem token do Blob)
+## M2 — Upload IFC (pronto, desligado por chave)
+- [x] Upload direto do navegador para Vercel Blob privado, com progresso (fallback em disco no dev)
+- [x] Validação de extensão, cabeçalho ISO-10303-21, schema e tamanho
+- [x] Versões por modelo, disciplinas, histórico, reprocessar, excluir
 
 ## M3 — Primeiro modelo 3D ✅
-- [x] G3D-050 web-ifc 0.0.77 (versão exigida pelo That Open 3.4)
-- [x] G3D-051 WASM + worker do Fragments servidos localmente (`scripts/copy-bim-assets.mjs`)
-- [x] G3D-052 Carregar IFC no navegador → Fragments
-- [x] G3D-070..077 Página do viewer, mundo, cena, câmera, renderer, grid, loader, órbita
-- [x] Pasta `.ifc/` com o modelo 26610 publicado em `/demo`
+- [x] web-ifc 0.0.77 + That Open 3.4 (WASM e worker servidos localmente)
+- [x] Modelo 26610 (36 MB, IFC2X3, 2.746 elementos, 9 pavimentos) abrindo no navegador
 
-## M4 — Viewer BIM
-- [x] G3D-078/079 Seleção + highlight
-- [x] G3D-080 Propriedades (atributos, Psets, quantidades, tipo, materiais, GlobalId)
-- [x] G3D-081 Árvore espacial (Projeto → Terreno → Edifício → Pavimento → classes)
-- [x] G3D-082..084 Ocultar / mostrar / isolar · raio-X
-- [x] G3D-085 Enquadrar seleção · G3D-086 Filtro por pavimento
-- [x] G3D-100 Corte (clipping) · G3D-101 Medição de distância
-- [x] G3D-103 Busca na árvore · G3D-104 Filtro por classe IFC
-- [x] G3D-107 Screenshot · G3D-108 Tela cheia · perspectiva/ortográfica
-- [ ] Cache do modelo processado (.frag) + miniatura no storage (abre 10x mais rápido)
-- [ ] Layout mobile validado em celular
+## M4 — Viewer BIM ✅
+- [x] Seleção + destaque, propriedades (atributos, Psets, quantidades, tipo, materiais, GlobalId)
+- [x] Árvore espacial, filtro por pavimento, filtro por classe IFC, busca
+- [x] Ocultar / mostrar / isolar / raio-X / enquadrar
+- [x] Medição de distância, corte, screenshot, tela cheia, perspectiva/ortográfica
+- [x] Processado no navegador → salvo como Fragments + miniatura (plataforma)
+- [x] Layout responsivo (celular)
 
-## M5 — Compartilhamento
-- [ ] G3D-120/121 Compartilhar projeto/modelo · G3D-124 token · G3D-125 expiração
-- [ ] G3D-122 Viewer público por link · G3D-126 QR Code
+## M5 — Compartilhamento ✅ (plataforma)
+- [x] Link público com validade/revogação + QR Code + contador de visualizações
+
+## AR — Realidade aumentada no iPhone
+- [x] Conversor IFC → USDZ (`scripts/ifc-to-ar.mjs`): maquete 1:50 e tamanho real, 13 MB cada
+- [~] Botão "Ver em AR" no viewer (AR Quick Look no Safari; QR Code no computador)
+- [ ] Teste no iPhone do Hícaro
 
 ## M6 — Produção V1
-- [x] G3D-146 Security headers
-- [ ] G3D-144 Limites de upload · G3D-145 rate limiting (login/cadastro)
-- [ ] G3D-147 Variáveis de produção · G3D-148 deploy de produção
-- [ ] G3D-149 Smoke tests (Playwright) · testes unitários (vitest)
-- [ ] G3D-140 Sentry · G3D-141 Vercel Analytics
-- [ ] README + docs/architecture + ADRs
+- [x] Headers de segurança + CSP, rate limit, páginas de erro, robots, Vercel Analytics
+- [x] Testes unitários (vitest) + fluxo E2E (Playwright) passando
+- [x] README
+- [~] CI no GitHub Actions · docs de arquitetura/deploy
+- [ ] Domínio próprio (quando definir o nome comercial)
 
-## Depois (V1.1+)
-- [-] Área de medição · explodido · colorir por categoria · transparência por classe
-- [-] Comentários / Issues / BCF
-- [-] Modelos federados (várias disciplinas no mesmo viewer)
-- [-] Worker BIM dedicado (Railway/Fly) para IFC muito grandes
-- [-] App iPhone + ARKit/RealityKit consumindo a mesma API
+## Depois
+- [-] Ligar a plataforma (login/projetos/upload) na produção
+- [-] Área, explodido, colorir por categoria, comentários/issues/BCF
+- [-] Modelos federados · worker BIM dedicado para IFC gigantes
+- [-] App iPhone nativo (ARKit/RealityKit) com AR 1:1 georreferenciado em obra

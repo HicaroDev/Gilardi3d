@@ -21,6 +21,14 @@ if (existsSync(demoDir)) {
   }
 }
 
+// Realidade aumentada (USDZ para AR Quick Look), gerada por scripts/ifc-to-ar.mjs.
+const arDir = join(demoDir, "ar");
+if (existsSync(arDir)) {
+  for (const file of readdirSync(arDir)) {
+    if (file.toLowerCase().endsWith(".usdz")) copies.push([join(arDir, file), `public/ar/${file}`]);
+  }
+}
+
 for (const [src, to] of copies) {
   const dest = join(root, to);
   if (!existsSync(src)) {
