@@ -309,8 +309,10 @@ export function BimViewerApp({
   };
 
   const showAll = async () => {
-    await viewerRef.current?.showAll();
-    await viewerRef.current?.setGhost(null);
+    await viewerRef.current?.resetView();
+    setToolState("select");
+    setSelection(null);
+    setInfo(null);
     setGhost(false);
     setHiddenNodes(new Set());
     setHiddenCats(new Set());

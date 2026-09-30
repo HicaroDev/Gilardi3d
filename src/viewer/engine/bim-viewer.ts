@@ -229,13 +229,27 @@ export class BimViewer {
   }
 
   async isolate(items: ModelIdMap) {
-    await this.hider.isolate(items);
+    // Sequencial de propósito: o Hider.isolate dispara "ocultar tudo" e "mostrar
+    // seleção" em paralelo, e em aparelhos lentos a ordem pode inverter.
+    await this.hider.set(false);
+    await this.hider.set(true, items);
     await this.fragments.core.update(true);
   }
 
   async showAll() {
     await this.hider.set(true);
     await this.fragments.core.update(true);
+  }
+
+  /** Volta ao estado inicial: tudo visível, sem raio-X, cortes, medições nem seleção, câmera enquadrada. */
+  async resetView() {
+    this.setTool("select");
+    this.clearClipping();
+    this.clearMeasurements();
+    await this.clearSelection();
+    await this.setGhost(null);
+    await this.showAll();
+    await this.fitAll();
   }
 
   async setGhost(items: ModelIdMap | null) {
