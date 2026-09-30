@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.ifc binary
+*.frag binary
+*.wasm binary
+*.png binary
+*.ico binary
