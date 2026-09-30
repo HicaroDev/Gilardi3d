@@ -33,7 +33,7 @@ Legenda: `[x]` feito · `[~]` em andamento · `[ ]` pendente · `[-]` depois
 ## M4 — Viewer BIM ✅
 - [x] Seleção + destaque, propriedades (atributos, Psets, quantidades, tipo, materiais, GlobalId)
 - [x] Árvore espacial, filtro por pavimento, filtro por classe IFC, busca
-- [x] Ocultar / mostrar / isolar / raio-X / enquadrar
+- [x] Ocultar / mostrar / isolar / raio-X / enquadrar · "Mostrar tudo" faz reset completo (fix 30/09)
 - [x] Medição de distância, corte, screenshot, tela cheia, perspectiva/ortográfica
 - [x] Processado no navegador → salvo como Fragments + miniatura (plataforma)
 - [x] Layout responsivo (celular)
