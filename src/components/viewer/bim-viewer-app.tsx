@@ -37,6 +37,7 @@ import type {
 } from "@/viewer/engine/types";
 import { ModelTree } from "./model-tree";
 import { PropertiesPanel } from "./properties-panel";
+import { Logo } from "@/components/ui/logo";
 
 export interface ViewerSource {
   kind: "ifc" | "frag";
@@ -60,6 +61,10 @@ interface Props {
   allowLocalFiles?: boolean;
   headerActions?: ReactNode;
   onProcessed?: (result: ProcessedResult) => Promise<void> | void;
+  onLoadStart?: (kind: "ifc" | "frag") => void;
+  onLoadError?: (message: string) => void;
+  /** Conteúdo extra sobreposto ao canvas (ex.: aviso de salvamento). */
+  overlay?: ReactNode;
 }
 
 type LeftTab = "tree" | "storeys" | "categories";
@@ -73,6 +78,9 @@ export function BimViewerApp({
   allowLocalFiles = false,
   headerActions,
   onProcessed,
+  onLoadStart,
+  onLoadError,
+  overlay,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<BimViewer | null>(null);
@@ -94,19 +102,13 @@ export function BimViewerApp({
   const [ghost, setGhost] = useState(false);
   const [ortho, setOrtho] = useState(false);
   const [filter, setFilter] = useState("");
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
+  // null = padrão por CSS (aberto no desktop, fechado no celular).
+  const [leftOpen, setLeftOpen] = useState<boolean | null>(null);
+  const [rightOpen, setRightOpen] = useState<boolean | null>(null);
+  const [finished, setFinished] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [modelName, setModelName] = useState<string | null>(source?.name ?? null);
   const loadedRef = useRef(false);
-
-  // Em telas pequenas, painéis começam fechados.
-  useEffect(() => {
-    if (window.matchMedia("(max-width: 900px)").matches) {
-      setLeftOpen(false);
-      setRightOpen(false);
-    }
-  }, []);
 
   const refreshData = useCallback(async () => {
     const v = viewerRef.current;
@@ -177,7 +179,9 @@ export function BimViewerApp({
       if (!v) return;
       setError(null);
       setModelName(name);
+      let st: ModelStats | undefined;
       try {
+        onLoadStart?.(kind);
         if (kind === "ifc") {
           await v.loadIfc(buffer, name, setProgress);
         } else {
@@ -185,21 +189,31 @@ export function BimViewerApp({
           await v.loadFragments(buffer, name);
         }
         setProgress({ stage: "done", percent: 100, label: "Pronto" });
-        const st = await refreshData();
+        st = await refreshData();
         setProgress(null);
-        if (kind === "ifc" && onProcessed && st) {
+        setFinished(true);
+      } catch (e) {
+        console.error(e);
+        setProgress(null);
+        setFinished(true);
+        const msg = "Falha ao processar o modelo. Confirme se o arquivo é um IFC válido (IFC2x3, IFC4 ou IFC4.3).";
+        setError(msg);
+        onLoadError?.(e instanceof Error ? `${msg} (${e.message.slice(0, 200)})` : msg);
+        return;
+      }
+      // O modelo já está na tela; salvar a versão otimizada é um passo à parte.
+      if (kind === "ifc" && onProcessed && st) {
+        try {
           const fragments = await v.exportFragments();
           await new Promise((r) => setTimeout(r, 400));
           const thumbnail = await v.thumbnail();
           if (fragments) await onProcessed({ fragments, thumbnail, stats: st });
+        } catch (e) {
+          console.error("[viewer] falha ao salvar modelo processado", e);
         }
-      } catch (e) {
-        console.error(e);
-        setProgress(null);
-        setError("Falha ao processar o modelo. Confirme se o arquivo é um IFC válido (IFC2x3, IFC4 ou IFC4.3).");
       }
     },
-    [onProcessed, refreshData],
+    [onProcessed, onLoadStart, onLoadError, refreshData],
   );
 
   // Carrega a fonte inicial (IFC ou fragments).
@@ -216,6 +230,7 @@ export function BimViewerApp({
       } catch (e) {
         console.error(e);
         setProgress(null);
+        setFinished(true);
         setError("Não foi possível baixar o modelo.");
       }
     })();
@@ -380,7 +395,7 @@ export function BimViewerApp({
   return (
     <div
       className="fixed inset-0 flex flex-col bg-bg text-fg"
-      data-viewer-state={error ? "error" : loading || !ready ? "loading" : tree.length ? "ready" : source && !loadedRef.current ? "loading" : "empty"}
+      data-viewer-state={error ? "error" : loading || !ready ? "loading" : tree.length ? "ready" : source && !finished ? "loading" : "empty"}
       onDragOver={(e) => {
         if (!allowLocalFiles) return;
         e.preventDefault();
@@ -407,7 +422,7 @@ export function BimViewerApp({
           </Link>
         )}
         <Link href="/" className="hidden items-center gap-2 sm:flex" aria-label="Gilardi 3D">
-          <LogoMark />
+          <Logo />
         </Link>
         <div className="min-w-0 flex-1 border-l border-line pl-3">
           <h1 className="truncate text-sm font-semibold">{title}</h1>
@@ -445,7 +460,7 @@ export function BimViewerApp({
         <aside
           className={clsx(
             "absolute inset-y-0 left-0 z-20 flex w-[min(320px,88vw)] flex-col border-r border-line bg-panel transition-transform md:static md:z-auto",
-            leftOpen ? "translate-x-0" : "-translate-x-full md:hidden",
+            leftOpen === true ? "translate-x-0" : leftOpen === false ? "-translate-x-full md:hidden" : "-translate-x-full md:translate-x-0",
           )}
         >
           <div className="flex items-center gap-1 border-b border-line p-2">
@@ -552,7 +567,7 @@ export function BimViewerApp({
           {!leftOpen && (
             <button
               type="button"
-              className="floating-btn left-3 top-3"
+              className={clsx("floating-btn left-3 top-3", leftOpen === null && "md:hidden")}
               onClick={() => setLeftOpen(true)}
               aria-label="Abrir árvore do modelo"
             >
@@ -562,7 +577,7 @@ export function BimViewerApp({
           {!rightOpen && (
             <button
               type="button"
-              className="floating-btn right-3 top-3"
+              className={clsx("floating-btn right-3 top-3", rightOpen === null && "md:hidden")}
               onClick={() => setRightOpen(true)}
               aria-label="Abrir propriedades"
             >
@@ -614,6 +629,8 @@ export function BimViewerApp({
               </div>
             </div>
           )}
+
+          {overlay}
 
           {dragging && (
             <div className="pointer-events-none absolute inset-3 grid place-items-center rounded-2xl border-2 border-dashed border-accent bg-accent/10 text-lg font-semibold">
@@ -668,7 +685,7 @@ export function BimViewerApp({
         <aside
           className={clsx(
             "absolute inset-y-0 right-0 z-20 flex w-[min(340px,92vw)] flex-col border-l border-line bg-panel transition-transform md:static md:z-auto",
-            rightOpen ? "translate-x-0" : "translate-x-full md:hidden",
+            rightOpen === true ? "translate-x-0" : rightOpen === false ? "translate-x-full md:hidden" : "translate-x-full md:translate-x-0",
           )}
         >
           <div className="flex h-12 items-center gap-2 border-b border-line px-3">
@@ -787,19 +804,3 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-export function LogoMark({ withText = true }: { withText?: boolean }) {
-  return (
-    <span className="flex items-center gap-2">
-      <svg viewBox="0 0 32 32" className="size-7" aria-hidden>
-        <path d="M16 2 29 9.5v13L16 30 3 22.5v-13z" fill="#f97316" />
-        <path d="M16 2 29 9.5 16 17 3 9.5z" fill="#fdba74" />
-        <path d="M16 17v13L3 22.5v-13z" fill="#c2410c" />
-      </svg>
-      {withText && (
-        <span className="text-[15px] font-bold tracking-tight">
-          Gilardi<span className="text-accent">3D</span>
-        </span>
-      )}
-    </span>
-  );
-}

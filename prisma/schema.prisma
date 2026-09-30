@@ -1,7 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Gilardi 3D — schema principal (PostgreSQL / Neon)
+// Hierarquia: User → Organization → Project → BimModel → ModelVersion → File
 
 generator client {
   provider = "prisma-client"
@@ -10,4 +8,286 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ------------------------------------------------------------------ enums
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ProjectRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum Discipline {
+  ARCHITECTURE
+  STRUCTURE
+  PLUMBING
+  ELECTRICAL
+  HVAC
+  FIRE
+  LANDSCAPE
+  COORDINATION
+  OTHER
+}
+
+enum ModelStatus {
+  CREATED
+  UPLOADING
+  UPLOADED
+  QUEUED
+  PROCESSING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+enum FileKind {
+  IFC_SOURCE
+  FRAGMENTS
+  THUMBNAIL
+  METADATA
+}
+
+enum StorageProvider {
+  BLOB
+  LOCAL
+}
+
+// ------------------------------------------------------------------ usuários
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  organizations  OrganizationMember[]
+  projectMembers ProjectMember[]
+  projects       Project[]            @relation("ProjectCreator")
+  models         BimModel[]           @relation("ModelCreator")
+  versions       ModelVersion[]       @relation("VersionUploader")
+  files          File[]
+  shares         Share[]
+  resetTokens    PasswordResetToken[]
+  auditLogs      AuditLog[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  OrganizationMember[]
+  projects Project[]
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           OrgRole  @default(MEMBER)
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+// ------------------------------------------------------------------ projetos
+
+model Project {
+  id             String        @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  location       String?
+  status         ProjectStatus @default(ACTIVE)
+  createdById    String
+  archivedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User            @relation("ProjectCreator", fields: [createdById], references: [id])
+  members      ProjectMember[]
+  models       BimModel[]
+  shares       Share[]
+
+  @@index([organizationId, status])
+}
+
+model ProjectMember {
+  id        String      @id @default(cuid())
+  projectId String
+  userId    String
+  role      ProjectRole @default(VIEWER)
+  createdAt DateTime    @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+}
+
+// ------------------------------------------------------------------ modelos BIM
+
+model BimModel {
+  id               String      @id @default(cuid())
+  projectId        String
+  name             String
+  discipline       Discipline  @default(ARCHITECTURE)
+  status           ModelStatus @default(CREATED)
+  currentVersionId String?     @unique
+  createdById      String
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy      User           @relation("ModelCreator", fields: [createdById], references: [id])
+  versions       ModelVersion[] @relation("ModelVersions")
+  currentVersion ModelVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  shares         Share[]
+
+  @@index([projectId])
+}
+
+model ModelVersion {
+  id            String      @id @default(cuid())
+  modelId       String
+  version       Int
+  status        ModelStatus @default(CREATED)
+  ifcSchema     String?
+  elementCount  Int?
+  storeyCount   Int?
+  categoryCount Int?
+  metadata      Json?
+  errorMessage  String?
+  uploadedById  String
+  processedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  model          BimModel        @relation("ModelVersions", fields: [modelId], references: [id], onDelete: Cascade)
+  currentOf      BimModel?       @relation("CurrentVersion")
+  uploadedBy     User            @relation("VersionUploader", fields: [uploadedById], references: [id])
+  files          File[]
+  processingJobs ProcessingJob[]
+
+  @@unique([modelId, version])
+}
+
+model File {
+  id          String          @id @default(cuid())
+  versionId   String?
+  kind        FileKind
+  name        String
+  storageKey  String          @unique
+  provider    StorageProvider
+  url         String?
+  mimeType    String
+  extension   String
+  size        BigInt
+  checksum    String?
+  createdById String
+  createdAt   DateTime        @default(now())
+
+  version   ModelVersion? @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  createdBy User          @relation(fields: [createdById], references: [id])
+
+  @@index([versionId, kind])
+}
+
+model ProcessingJob {
+  id         String    @id @default(cuid())
+  versionId  String
+  status     JobStatus @default(QUEUED)
+  engine     String    @default("browser/web-ifc")
+  progress   Int       @default(0)
+  stage      String?
+  error      String?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  version ModelVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@index([versionId])
+}
+
+// ------------------------------------------------------------------ compartilhamento e auditoria
+
+model Share {
+  id          String    @id @default(cuid())
+  token       String    @unique
+  projectId   String
+  modelId     String?
+  label       String?
+  createdById String
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  views       Int       @default(0)
+  lastViewAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  model     BimModel? @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  createdBy User      @relation(fields: [createdById], references: [id])
+
+  @@index([projectId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
 }

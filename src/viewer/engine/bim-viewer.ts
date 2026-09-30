@@ -150,7 +150,7 @@ export class BimViewer {
         },
       },
     });
-    await this.afterModelLoaded(model);
+    await this.afterModelLoaded();
     onProgress?.({ stage: "done", percent: 100, label: "Pronto" });
     return model;
   }
@@ -161,11 +161,11 @@ export class BimViewer {
       modelId: uniqueId(name),
       camera: this.world.camera.three,
     });
-    await this.afterModelLoaded(model);
+    await this.afterModelLoaded();
     return model;
   }
 
-  private async afterModelLoaded(model: FRAGS.FragmentsModel) {
+  private async afterModelLoaded() {
     await this.fragments.core.update(true);
     await this.fitAll();
   }

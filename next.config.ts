@@ -6,7 +6,26 @@ import type { NextConfig } from "next";
 const TTF_LOADER = "three/examples/jsm/loaders/TTFLoader.js";
 const TTF_LOCAL = "./src/vendor/ttf-loader.js";
 
+// CSP: o viewer precisa de WebAssembly (web-ifc), workers (Fragments) e
+// downloads diretos do Vercel Blob (URLs pré-assinadas).
+const isDev = process.env.NODE_ENV !== "production";
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""} https://va.vercel-scripts.com`,
+  "worker-src 'self' blob:",
+  "connect-src 'self' blob: data: https://*.public.blob.vercel-storage.com https://*.blob.vercel-storage.com https://*.vercel-storage.com https://vercel.com https://*.vercel-insights.com" +
+    (isDev ? " ws: http://localhost:*" : ""),
+  "img-src 'self' data: blob: https://*.blob.vercel-storage.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+].join("; ");
+
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable */
 // Cópia do TTFLoader do three.js usando o opentype.js local (o original importa de CDN).
 import {
 	FileLoader,
