@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# arquivos gerados a partir de node_modules/.ifc (scripts/copy-bim-assets.mjs)
+/public/wasm/
+/public/fragments/
+/public/ifc/
+
+# prisma client gerado
+/src/generated/
+
+# skills instaladas por ferramentas (prisma init)
+/.agents/
+/.windsurf/
+/.claude/
+skills-lock.json
+
+# testes
+/test-results/
+/playwright-report/
