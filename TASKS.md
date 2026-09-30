@@ -3,7 +3,7 @@
 > Plataforma BIM própria (fluxo tipo Augin): projetos → upload IFC → processamento → viewer 3D → compartilhamento → AR no iPhone.
 > Fonte do plano: `seed.md`. Decisão de 30/09: **site público = só o modelo 26610, sem login**; plataforma completa pronta e desligada por chave.
 
-**Progresso geral: 88 %**
+**Progresso geral: 95 %** (entregue em produção em 30/09; falta o teste real de AR no iPhone)
 
 Legenda: `[x]` feito · `[~]` em andamento · `[ ]` pendente · `[-]` depois
 
@@ -12,7 +12,7 @@ Legenda: `[x]` feito · `[~]` em andamento · `[ ]` pendente · `[-]` depois
 - [x] Validação de variáveis de ambiente (zod)
 - [x] Projeto Vercel `gilardi3d` ligado ao GitHub `HicaroDev/Gilardi3d`
 - [x] Primeiro deploy público: https://gilardi3d.vercel.app/demo
-- [~] Deploy de produção da versão atual (liberado pelo Hícaro)
+- [x] Produção atualizada: https://gilardi3d.vercel.app (home = modelo 26610 + botão AR)
 
 ## M1 — Banco + Auth + Projetos (pronto, desligado por chave)
 - [x] PostgreSQL + Prisma 7: User, Organization, Member, Project, ProjectMember, BimModel, ModelVersion, File, ProcessingJob, Share, AuditLog
@@ -43,14 +43,14 @@ Legenda: `[x]` feito · `[~]` em andamento · `[ ]` pendente · `[-]` depois
 
 ## AR — Realidade aumentada no iPhone
 - [x] Conversor IFC → USDZ (`scripts/ifc-to-ar.mjs`): maquete 1:50 e tamanho real, 13 MB cada
-- [~] Botão "Ver em AR" no viewer (AR Quick Look no Safari; QR Code no computador)
+- [x] Botão "Ver em AR" no viewer (AR Quick Look no Safari; QR Code no computador)
 - [ ] Teste no iPhone do Hícaro
 
 ## M6 — Produção V1
 - [x] Headers de segurança + CSP, rate limit, páginas de erro, robots, Vercel Analytics
 - [x] Testes unitários (vitest) + fluxo E2E (Playwright) passando
 - [x] README
-- [~] CI no GitHub Actions · docs de arquitetura/deploy
+- [x] CI no GitHub Actions · docs de arquitetura/deploy + ADRs
 - [ ] Domínio próprio (quando definir o nome comercial)
 
 ## Depois
