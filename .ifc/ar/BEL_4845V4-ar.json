@@ -1,0 +1,22 @@
+{
+  "source": "BEL_4845V4.ifc",
+  "generatedAt": "2026-10-02T11:25:50.309Z",
+  "triangles": 275497,
+  "materials": 34,
+  "sizeMeters": {
+    "x": 42.7,
+    "y": 11.93,
+    "z": 14.14
+  },
+  "maqueteScale": "1:100",
+  "files": {
+    "maquete": {
+      "file": "BEL_4845V4-maquete.usdz",
+      "mb": 7.7
+    },
+    "real": {
+      "file": "BEL_4845V4-real.usdz",
+      "mb": 7.7
+    }
+  }
+}

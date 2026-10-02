@@ -37,15 +37,17 @@ export function ArButton({ assets }: { assets: ArAssets }) {
   useEffect(() => {
     if (!open || quickLook !== false) return;
     const url = new URL(window.location.href);
-    url.search = "?ar=1";
+    // Mantém o projeto escolhido (?projeto=...) no link do QR.
+    url.searchParams.set("ar", "1");
     void QRCode.toDataURL(url.toString(), { margin: 1, width: 320, color: { dark: "#0b1220", light: "#ffffff" } }).then(setQr);
   }, [open, quickLook]);
 
   const { x, y, z } = assets.sizeMeters;
+  const ratio = Number(assets.maqueteScale.split(":")[1]) || 50;
 
   return (
     <>
-      <button type="button" className="btn-primary h-9 px-3" onClick={() => setOpen(true)} data-testid="ar-button">
+      <button type="button" className="btn-primary h-9 whitespace-nowrap px-3" onClick={() => setOpen(true)} data-testid="ar-button">
         <Smartphone className="size-4" />
         <span>Ver em AR</span>
       </button>
@@ -79,7 +81,7 @@ export function ArButton({ assets }: { assets: ArAssets }) {
                         <Box className="size-4 text-accent" /> Maquete na mesa
                       </span>
                       <span className="block text-[12px] text-muted">
-                        Escala {assets.maqueteScale} · cerca de {Math.round((x * 100) / 50)}×{Math.round((z * 100) / 50)} cm
+                        Escala {assets.maqueteScale} · cerca de {Math.round((x * 100) / ratio)}×{Math.round((z * 100) / ratio)} cm
                       </span>
                     </span>
                   </a>

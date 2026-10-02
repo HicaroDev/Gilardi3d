@@ -1,0 +1,22 @@
+{
+  "source": "Office building.ifc",
+  "generatedAt": "2026-10-02T11:26:03.604Z",
+  "triangles": 2066071,
+  "materials": 21,
+  "sizeMeters": {
+    "x": 93.16,
+    "y": 30,
+    "z": 93.57
+  },
+  "maqueteScale": "1:200",
+  "files": {
+    "maquete": {
+      "file": "Office building-maquete.usdz",
+      "mb": 69
+    },
+    "real": {
+      "file": "Office building-real.usdz",
+      "mb": 69
+    }
+  }
+}
