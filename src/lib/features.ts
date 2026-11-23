@@ -16,7 +16,7 @@ export interface PublicProject {
   fileName: string;
   size: number;
   /** Realidade aumentada (iPhone / AR Quick Look), gerada por scripts/ifc-to-ar.mjs. */
-  ar: ArAssets;
+  ar?: ArAssets;
 }
 
 /** Projetos do site público. O primeiro abre na página inicial. */
@@ -59,6 +59,12 @@ export const PUBLIC_PROJECTS: PublicProject[] = [
       sizeMeters: { x: 93.16, y: 30, z: 93.57 },
       sizeMb: 69,
     },
+  },
+  {
+    slug: "ten-321",
+    title: "Projeto TEN-321",
+    fileName: "TEN-321-RES.ifc",
+    size: 6128496,
   },
 ];
 

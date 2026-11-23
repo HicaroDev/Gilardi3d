@@ -65,7 +65,7 @@ function Inner({ featuredOnly }: { featuredOnly: boolean }) {
         project ? (
           <>
             <ProjectSelect value={project.slug} />
-            <ArButton key={project.slug} assets={project.ar} />
+            {project.ar ? <ArButton key={project.slug} assets={project.ar} /> : null}
           </>
         ) : null
       }
