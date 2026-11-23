@@ -66,6 +66,12 @@ export const PUBLIC_PROJECTS: PublicProject[] = [
     fileName: "TEN-321-RES.ifc",
     size: 6128496,
   },
+  {
+    slug: "luna",
+    title: "Projeto Luna",
+    fileName: "PROJETO-LUNA1.ifc",
+    size: 5614376,
+  },
 ];
 
 export function ifcUrl(project: PublicProject) {
