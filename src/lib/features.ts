@@ -69,8 +69,8 @@ export const PUBLIC_PROJECTS: PublicProject[] = [
   {
     slug: "luna",
     title: "Projeto Luna",
-    fileName: "PROJETO-LUNA1.ifc",
-    size: 5614376,
+    fileName: "PROJETO-LUNA2.ifc",
+    size: 5573018,
   },
 ];
 
